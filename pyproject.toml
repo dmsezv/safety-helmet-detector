@@ -1,5 +1,5 @@
 [project]
-name = "object-detection"
+name = "safety_helmet_detection"
 version = "0.1.0"
 description = "MLOps Object Detection Project"
 readme = "README.md"
@@ -16,6 +16,9 @@ dependencies = [
     "scikit-learn",
     "albumentations",
 ]
+
+[tool.hatch.build]
+packages = ["src/safety_helmet_detection"]
 
 [build-system]
 requires = ["hatchling"]
