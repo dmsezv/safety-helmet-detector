@@ -1,0 +1,43 @@
+[project]
+name = "object-detection"
+version = "0.1.0"
+description = "MLOps Object Detection Project"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "torch",
+    "torchvision",
+    "hydra-core",
+    "dvc",
+    "mlflow",
+    "fire",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "albumentations",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit",
+    "ruff",
+    "pytest",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
