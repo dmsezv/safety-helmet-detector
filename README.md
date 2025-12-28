@@ -84,8 +84,10 @@ safety-helmet-ds/
 
 **Базовый запуск:**
 
+**Базовый запуск:**
+
 ```bash
-python commands.py train
+python -m safety_helmet_detection.commands train
 ```
 
 Эта команда:
@@ -99,19 +101,19 @@ python commands.py train
 **Изменить количество эпох и размер батча:**
 
 ```bash
-python commands.py train --train.epochs=20 --data.batch_size=8
+python -m safety_helmet_detection.commands train --train.epochs=20 --data.batch_size=8
 ```
 
 **Включить автоматическое скачивание данных (если они не существуют):**
 
 ```bash
-python commands.py train --data.download=True
+python -m safety_helmet_detection.commands train --data.download=True
 ```
 
 **Изменить Learning Rate:**
 
 ```bash
-python commands.py train --model.lr=0.001
+python -m safety_helmet_detection.commands train --model.lr=0.001
 ```
 
 ### Логирование (MLFlow)
@@ -132,5 +134,5 @@ python commands.py train --model.lr=0.001
 _(Примечание: В текущей версии это заглушка для демонстрации интерфейса)_
 
 ```bash
-python commands.py infer --checkpoint_path="outputs/.../best.ckpt" --image_path="test_image.jpg"
+python -m safety_helmet_detection.commands infer --checkpoint_path="outputs/.../best.ckpt" --image_path="test_image.jpg"
 ```

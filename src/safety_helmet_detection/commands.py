@@ -1,17 +1,12 @@
 import logging
-import sys
-from pathlib import Path
 
 import fire
 import hydra
 from hydra.core.global_hydra import GlobalHydra
 
-# Ensure src is in path so we can import the package if not installed
-sys.path.append(str(Path(__file__).parent / "src"))
-
-from safety_helmet_detection.data.downloader import download_data as download_task  # noqa: E402
-from safety_helmet_detection.infer import infer as infer_task  # noqa: E402
-from safety_helmet_detection.train import train as train_task  # noqa: E402
+from .data.downloader import download_data as download_task
+from .infer import infer as infer_task
+from .train import train as train_task
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +17,7 @@ class Commands:
             overrides = []
 
         GlobalHydra.instance().clear()
-        hydra.initialize(version_base=None, config_path="configs")
+        hydra.initialize(version_base=None, config_path="../../configs")
         cfg = hydra.compose(config_name="config", overrides=overrides)
         return cfg
 
