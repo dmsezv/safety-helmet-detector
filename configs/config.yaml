@@ -1,0 +1,10 @@
+defaults:
+  - data: default
+  - model: fasterrcnn
+  - train: default
+  - logger: mlflow
+  - _self_
+
+project_name: safety-helmet-detector
+seed: 42
+tags: ["dev"]

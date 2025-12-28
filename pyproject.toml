@@ -1,35 +1,35 @@
-[project]
-name = "safety_helmet_detection"
+[tool.poetry]
+name = "safety-helmet-detector"
 version = "0.1.0"
-description = "MLOps Object Detection Project"
+description = "Safety Helmet Detection MLOps Project"
+authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
-requires-python = ">=3.9"
-dependencies = [
-    "torch",
-    "torchvision",
-    "hydra-core",
-    "dvc",
-    "mlflow",
-    "fire",
-    "numpy",
-    "pandas",
-    "scikit-learn",
-    "albumentations",
-]
+packages = [{include = "safety_helmet_detection", from = "src"}]
 
-[tool.hatch.build]
-packages = ["src/safety_helmet_detection"]
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+torch = ">=2.0.0"
+torchvision = ">=0.15.0"
+pytorch-lightning = "^2.1.0"
+hydra-core = "^1.3.2"
+omegaconf = "^2.3.0"
+fire = "^0.5.0"
+ultralytics = "^8.0.0"
+dvc = "^3.0.0"
+mlflow = "^2.8.0"
+numpy = "^1.24.0"
+pandas = "^2.0.0"
+scikit-learn = "^1.3.0"
+albumentations = "^1.3.1"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.5.0"
+ruff = "^0.1.5"
+pytest = "^7.4.0"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project.optional-dependencies]
-dev = [
-    "pre-commit",
-    "ruff",
-    "pytest",
-]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 120
