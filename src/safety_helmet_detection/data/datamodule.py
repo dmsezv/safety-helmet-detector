@@ -33,7 +33,7 @@ class SafetyHelmetDataModule(pl.LightningDataModule):
         # Instantiate datasets
         ds_full = SafetyHelmetDataset(self.data_dir, transform=None)
         full_size = len(ds_full)
-        train_size = int(0.8 * full_size)
+        train_size = int(self.cfg.data.train_split * full_size)
 
         indices = torch.randperm(full_size, generator=torch.Generator().manual_seed(self.cfg.seed)).tolist()
         train_idx = indices[:train_size]
