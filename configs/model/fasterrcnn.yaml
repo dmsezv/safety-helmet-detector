@@ -1,4 +1,5 @@
 name: fasterrcnn_resnet50_fpn
+type: fasterrcnn
 num_classes: 3
 pretrained: True
 lr: 0.005

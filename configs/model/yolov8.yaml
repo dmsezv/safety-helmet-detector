@@ -1,5 +1,7 @@
 name: yolov8m.pt
+type: yolo
 num_classes: 3
 pretrained: True
 conf_threshold: 0.25
 iou_threshold: 0.45
+lr: 0.01
