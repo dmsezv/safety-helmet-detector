@@ -24,6 +24,10 @@
   ```bash
   curl -sSL https://install.python-poetry.org | python3 -
   ```
+  _Примечание: После установки может потребоваться добавить `~/.local/bin` в ваш `PATH`. Выполните:_
+  ```bash
+  export PATH="$HOME/.local/bin:$PATH"
+  ```
 - **Windows (PowerShell):**
   ```powershell
   (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -

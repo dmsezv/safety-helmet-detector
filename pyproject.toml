@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "safety_helmet_detection", from = "src"}]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.9,<3.13"
 torch = ">=2.0.0"
 torchvision = ">=0.15.0"
 pytorch-lightning = "^2.1.0"
