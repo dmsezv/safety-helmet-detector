@@ -47,32 +47,21 @@
    ```
 
 2. **Установите зависимости:**
-   Poetry создаст изолированное виртуальное окружение и установит все необходимые пакеты.
 
    ```bash
    poetry install
    ```
 
-3. **Активируйте виртуальное окружение:**
-   Эта команда активирует созданное окружение в текущем терминале.
+3. **Настройте pre-commit хуки:**
 
    ```bash
-   poetry shell
+   poetry run pre-commit install
    ```
 
-   _Альтернативно, вы можете запускать команды без активации, используя префикс `poetry run`, например: `poetry run python ...`_
-
-4. **Настройте pre-commit хуки:**
-   Это обязательно для проверки качества кода перед коммитами.
+4. **Проверьте корректность установки:**
 
    ```bash
-   pre-commit install
-   ```
-
-5. **Проверьте корректность установки:**
-   Запустите проверку на всех файлах. Все проверки должны пройти успешно (Passed).
-   ```bash
-   pre-commit run -a
+   poetry run pre-commit run -a
    ```
 
 ## Data
@@ -103,13 +92,13 @@ safety-helmet-ds/
 Для запуска обучения с дефолтными параметрами:
 
 ```bash
-python -m safety_helmet_detection.commands train
+poetry run python -m safety_helmet_detection.commands train
 ```
 
 **Если данные еще не скачаны**, добавьте флаг `data.download=True`:
 
 ```bash
-python -m safety_helmet_detection.commands train data.download=True
+poetry run python -m safety_helmet_detection.commands train data.download=True
 ```
 
 Система автоматически скачает датасет с Google Drive в папку `safety-helmet-ds` перед началом обучения.
@@ -123,18 +112,18 @@ python -m safety_helmet_detection.commands train data.download=True
 1. **Изменить количество эпох и размер батча:**
 
    ```bash
-   python -m safety_helmet_detection.commands train train.epochs=20 data.batch_size=8
+   poetry run python -m safety_helmet_detection.commands train train.epochs=20 data.batch_size=8
    ```
 
 2. **Изменить Learning Rate:**
 
    ```bash
-   python -m safety_helmet_detection.commands train model.lr=0.001
+   poetry run python -m safety_helmet_detection.commands train model.lr=0.001
    ```
 
 3. **Использовать GPU (если доступно):**
    ```bash
-   python -m safety_helmet_detection.commands train train.accelerator=gpu train.devices=1
+   poetry run python -m safety_helmet_detection.commands train train.accelerator=gpu train.devices=1
    ```
 
 ### Logging
@@ -143,7 +132,7 @@ python -m safety_helmet_detection.commands train data.download=True
 Перед запуском обучения поднимите локальный сервер MLFlow:
 
 ```bash
-mlflow server --host 127.0.0.1 --port 8080
+poetry run mlflow server --host 127.0.0.1 --port 8080
 ```
 
 Результаты будут доступны по адресу http://127.0.0.1:8080.
@@ -158,5 +147,5 @@ mlflow server --host 127.0.0.1 --port 8080
 Для запуска инференса (предсказания) можно воспользоваться командой `infer`:
 
 ```bash
-python -m safety_helmet_detection.commands infer --checkpoint_path="outputs/best_model.ckpt" --image_path="test_image.jpg"
+poetry run python -m safety_helmet_detection.commands infer --checkpoint_path="outputs/best_model.ckpt" --image_path="test_image.jpg"
 ```
