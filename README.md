@@ -52,16 +52,22 @@
    poetry install
    ```
 
-3. **Настройте pre-commit хуки:**
+3. **Активируйте виртуальное окружение:**
 
    ```bash
-   poetry run pre-commit install
+   source $(poetry env info --path)/bin/activate
    ```
 
-4. **Проверьте корректность установки:**
+4. **Настройте pre-commit хуки:**
 
    ```bash
-   poetry run pre-commit run -a
+   pre-commit install
+   ```
+
+5. **Проверьте корректность установки:**
+
+   ```bash
+   pre-commit run -a
    ```
 
 ## Data
@@ -92,13 +98,13 @@ safety-helmet-ds/
 Для запуска обучения с дефолтными параметрами:
 
 ```bash
-poetry run python -m safety_helmet_detection.commands train
+python -m safety_helmet_detection.commands train
 ```
 
 **Если данные еще не скачаны**, добавьте флаг `data.download=True`:
 
 ```bash
-poetry run python -m safety_helmet_detection.commands train data.download=True
+python -m safety_helmet_detection.commands train data.download=True
 ```
 
 Система автоматически скачает датасет с Google Drive в папку `safety-helmet-ds` перед началом обучения.
@@ -112,18 +118,18 @@ poetry run python -m safety_helmet_detection.commands train data.download=True
 1. **Изменить количество эпох и размер батча:**
 
    ```bash
-   poetry run python -m safety_helmet_detection.commands train train.epochs=20 data.batch_size=8
+   python -m safety_helmet_detection.commands train train.epochs=20 data.batch_size=8
    ```
 
 2. **Изменить Learning Rate:**
 
    ```bash
-   poetry run python -m safety_helmet_detection.commands train model.lr=0.001
+   python -m safety_helmet_detection.commands train model.lr=0.001
    ```
 
 3. **Использовать GPU (если доступно):**
    ```bash
-   poetry run python -m safety_helmet_detection.commands train train.accelerator=gpu train.devices=1
+   python -m safety_helmet_detection.commands train train.accelerator=gpu train.devices=1
    ```
 
 ### Logging
@@ -132,7 +138,7 @@ poetry run python -m safety_helmet_detection.commands train data.download=True
 Перед запуском обучения поднимите локальный сервер MLFlow:
 
 ```bash
-poetry run mlflow server --host 127.0.0.1 --port 8080
+mlflow server --host 127.0.0.1 --port 8080
 ```
 
 Результаты будут доступны по адресу http://127.0.0.1:8080.
@@ -147,5 +153,5 @@ poetry run mlflow server --host 127.0.0.1 --port 8080
 Для запуска инференса (предсказания) можно воспользоваться командой `infer`:
 
 ```bash
-poetry run python -m safety_helmet_detection.commands infer --checkpoint_path="outputs/best_model.ckpt" --image_path="test_image.jpg"
+python -m safety_helmet_detection.commands infer --checkpoint_path="outputs/best_model.ckpt" --image_path="test_image.jpg"
 ```
