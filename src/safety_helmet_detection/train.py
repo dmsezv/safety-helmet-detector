@@ -1,7 +1,10 @@
+"""Training orchestration module."""
+
 import logging
 
 import pytorch_lightning as pl
 from omegaconf import DictConfig, OmegaConf
+from pytorch_lightning.loggers import MLFlowLogger
 
 from .data.datamodule import SafetyHelmetDataModule
 from .models.module import SafetyHelmetDetector
@@ -10,36 +13,50 @@ logger = logging.getLogger(__name__)
 
 
 def train(cfg: DictConfig):
-    """
-    Main training routine.
-    """
-    logger.info(f"Training configuration:\n{OmegaConf.to_yaml(cfg)}")
+    """Main entry point for training. Routes to appropriate backend."""
+    model_type = cfg.model.get("type", "fasterrcnn")
+
+    if model_type == "yolo":
+        from .train_yolo import train_yolo
+
+        train_yolo(cfg)
+    else:
+        train_lightning(cfg)
+
+
+def train_lightning(cfg: DictConfig):
+    """Train model using PyTorch Lightning."""
+    logger.info(f"Config:\n{OmegaConf.to_yaml(cfg)}")
     pl.seed_everything(cfg.seed)
 
-    # Initialize DataModule and Model
-    dm = SafetyHelmetDataModule(cfg)
+    datamodule = SafetyHelmetDataModule(cfg)
     model = SafetyHelmetDetector(cfg)
 
-    # Logger setup
-    logger_pl = None
-    if cfg.logger.get("tracking_uri"):
-        from pytorch_lightning.loggers import MLFlowLogger
+    pl_logger = _create_logger(cfg)
+    trainer = _create_trainer(cfg, pl_logger)
 
-        logger_pl = MLFlowLogger(
-            experiment_name=cfg.logger.experiment_name,
-            tracking_uri=cfg.logger.tracking_uri,
-            log_model=cfg.logger.log_model,
-        )
+    trainer.fit(model, datamodule=datamodule)
 
-    # Init Trainer
-    trainer = pl.Trainer(
+
+def _create_logger(cfg: DictConfig):
+    """Create MLFlow logger if tracking_uri is configured."""
+    if not cfg.logger.get("tracking_uri"):
+        return True
+
+    return MLFlowLogger(
+        experiment_name=cfg.logger.experiment_name,
+        tracking_uri=cfg.logger.tracking_uri,
+        log_model=cfg.logger.log_model,
+    )
+
+
+def _create_trainer(cfg: DictConfig, pl_logger):
+    """Create PyTorch Lightning Trainer."""
+    return pl.Trainer(
         max_epochs=cfg.train.epochs,
         accelerator=cfg.train.accelerator,
         devices=cfg.train.devices,
-        logger=logger_pl if logger_pl else True,
+        logger=pl_logger,
         log_every_n_steps=10,
         precision=cfg.train.get("precision", 32),
     )
-
-    # Start Training
-    trainer.fit(model, datamodule=dm)
