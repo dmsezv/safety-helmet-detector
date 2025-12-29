@@ -16,7 +16,7 @@ class SafetyHelmetDataModule(pl.LightningDataModule):
 
     def prepare_data(self):
         if self.cfg.data.download:
-            download_data(self.data_dir)
+            download_data(self.data_dir, self.cfg.data.get("gdrive_folder_url"))
 
     def setup(self, stage=None):
         # Augmentations

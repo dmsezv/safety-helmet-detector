@@ -2,56 +2,67 @@
 
 Проект по детекции защитных касок (Safety Helmets) с использованием PyTorch Lightning, Hydra и DVC.
 
+## Описание проекта
+
+Проект решает задачу детекции объектов (Object Detection) на строительных площадках.
+Целевые классы:
+
+- `Helmet` (Каска)
+- `Head` (Голова без каски)
+- `Person` (Человек)
+
 ## Setup
 
-В этом проекте для управления зависимостями и упаковки используется [Poetry](https://python-poetry.org/).
+В этом проекте для управления зависимостями используется [Poetry](https://python-poetry.org/).
+Для обеспечения качества кода используются `pre-commit` хуки.
 
-### Предварительные требования
+### 1. Предварительные требования
 
-- Python 3.9 или выше
-- Установленный Poetry (инструкция по установке: https://python-poetry.org/docs/#installation)
+- Python 3.9+
+- Poetry (инструкция: https://python-poetry.org/docs/#installation)
+- Git
 
-### Установка окружения
+### 2. Установка окружения
 
-1. **Клонируйте репозиторий и перейдите в папку проекта:**
+Следуйте этим шагам для настройки чистого окружения:
+
+1. **Клонируйте репозиторий:**
 
    ```bash
    git clone <your-repo-url>
    cd safety-helmet-detector
    ```
 
-2. **Установите зависимости:**
-   Команда создаст виртуальное окружение и установит все необходимые пакеты.
+2. **Создайте и активируйте виртуальное окружение, установите зависимости:**
 
    ```bash
    poetry install
-   ```
-
-3. **Активируйте виртуальное окружение:**
-
-   ```bash
    poetry shell
    ```
 
-4. **Настройте pre-commit хуки:**
-   Это необходимо для автоматической проверки стиля кода (Ruff, Prettier) перед каждым коммитом.
+3. **Установите pre-commit хуки:**
+   Это обязательно для проверки качества кода перед коммитами.
 
    ```bash
    pre-commit install
    ```
 
-   Проверить, что всё настроено корректно, можно запустив проверку на всех файлах:
-
+4. **Проверьте работоспособность хуков:**
+   Запустите проверку на всех файлах. Все проверки должны пройти успешно (Passed).
    ```bash
    pre-commit run -a
    ```
 
-   Должен отобразиться список проверок с зеленым статусом `Passed`.
-
 ## Data
 
-Используется датасет [Safety Helmet Detection](https://www.kaggle.com/datasets/andrewmvd/hard-hat-detection/data).
-Структура данных ожидается в папке `safety-helmet-ds` в корне проекта:
+Данные хранятся на Google Drive. Проект настроен на автоматическое скачивание данных при необходимости.
+
+Ссылка на датасет (для справки): [Google Drive Folder](https://drive.google.com/drive/folders/1Jc-z_kAirl-vE65zpc1U3e73oX0YBzIz?usp=sharing).
+**Важно:** Ссылка уже сконфигурирована в `configs/data/default.yaml` и не требует ручного скачивания пользователем.
+
+Для управления версионированием данных используется DVC (при наличии настроенного remote). В данном учебном примере реализована функция `download_data`, которая использует `gdown` для загрузки данных с Google Drive, если они отсутствуют локально.
+
+Структура данных после скачивания (`safety-helmet-ds/`):
 
 ```
 safety-helmet-ds/
@@ -61,78 +72,69 @@ safety-helmet-ds/
     └── *.xml
 ```
 
-В проекте есть функция для автоматической загрузки данных (mock-реализация). Чтобы ее использовать, передайте флаг при запуске обучения (см. раздел Train).
-
-## Configuration (Hydra)
-
-Конфигурация проекта управляется через [Hydra](https://hydra.cc/). Конфигурационные файлы находятся в папке `configs/`.
-
-Основные группы параметров:
-
-- `data`: параметры датасета, такие как размер батча, размер изображения.
-- `model`: параметры модели (FasterRCNN/YOLO), количество классов, learning rate.
-- `train`: параметры тренера (количество эпох, accelerator, devices).
-- `logger`: настройки MLFlow.
-
-Вы можете менять любой параметр из командной строки, не изменяя файлы конфигов.
-
 ## Train
 
-Для запуска команд используется единая точка входа `commands.py`.
+Запуск тренировки осуществляется через CLI утилиту `commands.py`.
 
 ### Запуск обучения
 
-**Базовый запуск:**
-
-**Базовый запуск:**
+Для запуска обучения с дефолтными параметрами:
 
 ```bash
 python -m safety_helmet_detection.commands train
 ```
 
-Эта команда:
-
-1. Инициализирует модель и датасет на основе конфигов в `configs/`.
-2. Запустит обучение с использованием PyTorch Lightning.
-3. Будет логировать метрики в MLFlow (если сервер доступен).
-
-### Примеры настройки через CLI
-
-**Изменить количество эпох и размер батча:**
+**Если данные еще не скачаны**, добавьте флаг `data.download=True`:
 
 ```bash
-python -m safety_helmet_detection.commands train --train.epochs=20 --data.batch_size=8
+python -m safety_helmet_detection.commands train data.download=True
 ```
 
-**Включить автоматическое скачивание данных (если они не существуют):**
+Система автоматически скачает датасет с Google Drive в папку `safety-helmet-ds` перед началом обучения.
 
-```bash
-python -m safety_helmet_detection.commands train --data.download=True
-```
+### Конфигурация обучения
 
-**Изменить Learning Rate:**
+Вы можете переопределять любые параметры конфигурации (Hydra) через командную строку.
 
-```bash
-python -m safety_helmet_detection.commands train --model.lr=0.001
-```
+Примеры:
 
-### Логирование (MLFlow)
+1. **Изменить количество эпох и размер батча:**
 
-Для сбора метрик (потери, параметры) используется MLFlow.
-
-1. Запустите локальный сервер MLFlow (в отдельном окне терминала):
    ```bash
-   mlflow server --host 127.0.0.1 --port 8080
+   python -m safety_helmet_detection.commands train train.epochs=20 data.batch_size=8
    ```
-2. Убедитесь, что в конфиге `configs/logger/mlflow.yaml` указан верный `tracking_uri` (по умолчанию `http://127.0.0.1:8080`).
 
-После запуска обучения графики лоссов (Classification, Box Regression, Objectness, RPN Box Regression) будут доступны в веб-интерфейсе MLFlow.
+2. **Изменить Learning Rate:**
+
+   ```bash
+   python -m safety_helmet_detection.commands train model.lr=0.001
+   ```
+
+3. **Использовать GPU (если доступно):**
+   ```bash
+   python -m safety_helmet_detection.commands train train.accelerator=gpu train.devices=1
+   ```
+
+### Logging
+
+Метрики обучения логируются в MLFlow.
+Перед запуском обучения поднимите локальный сервер MLFlow:
+
+```bash
+mlflow server --host 127.0.0.1 --port 8080
+```
+
+Результаты будут доступны по адресу http://127.0.0.1:8080.
+Логируются:
+
+- Loss (train/val)
+- Гиперпараметры
+- Версия кода (Git commit)
 
 ## Inference
 
-Для запуска предсказания модели на новых изображениях используется команда `infer`.
-_(Примечание: В текущей версии это заглушка для демонстрации интерфейса)_
+Для запуска инференса (предсказания) можно воспользоваться командой `infer`:
 
 ```bash
-python -m safety_helmet_detection.commands infer --checkpoint_path="outputs/.../best.ckpt" --image_path="test_image.jpg"
+python -m safety_helmet_detection.commands infer --checkpoint_path="outputs/best_model.ckpt" --image_path="test_image.jpg"
 ```

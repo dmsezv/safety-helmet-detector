@@ -5,3 +5,4 @@ num_workers: 4
 download: False
 names: ["Helmet", "Person", "Head"]
 train_split: 0.8
+gdrive_folder_url: "https://drive.google.com/drive/folders/1Jc-z_kAirl-vE65zpc1U3e73oX0YBzIz?usp=sharing"

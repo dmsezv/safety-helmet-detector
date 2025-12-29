@@ -40,11 +40,11 @@ class Commands:
         """
         infer_task(checkpoint_path, image_path, **kwargs)
 
-    def download_data(self, data_dir="safety-helmet-ds"):
+    def download_data(self, data_dir="safety-helmet-ds", gdrive_url=None):
         """
         Download dataset.
         """
-        download_task(data_dir)
+        download_task(data_dir, gdrive_url)
 
 
 if __name__ == "__main__":
