@@ -38,8 +38,8 @@ def train_lightning(cfg: DictConfig):
 
     trainer.fit(model, datamodule=datamodule)
 
-    # Export best model to ONNX
     best_path = trainer.checkpoint_callback.best_model_path
+
     if best_path:
         logger.info(f"Exporting best model to ONNX: {best_path}")
         export_model(best_path, model_type="fasterrcnn")

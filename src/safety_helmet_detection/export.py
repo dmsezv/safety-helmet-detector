@@ -52,9 +52,9 @@ def _export_yolo(checkpoint_path: Path, **kwargs):
         return None
 
     model = YOLO(checkpoint_path)
-    # YOLO.export returns the path to the exported file
     path = model.export(format="onnx", **kwargs)
     logger.info(f"YOLO model exported to {path}")
+
     return path
 
 
@@ -62,26 +62,20 @@ def _export_fasterrcnn(checkpoint_path: Path, output_path: str, img_size: Option
     """Export FasterRCNN model using torch.onnx."""
     from .models.module import SafetyHelmetDetector
 
-    # Load model
     try:
         model = SafetyHelmetDetector.load_from_checkpoint(checkpoint_path)
     except Exception as e:
         logger.error(f"Failed to load FasterRCNN checkpoint: {e}")
-        # Try loading as raw weights if lightning load fails
         return None
 
     model.eval()
     model.to("cpu")
 
-    # Create dummy input
     if img_size is None:
         img_size = getattr(model.cfg.data, "img_size", 640)
 
     dummy_input = torch.randn(1, 3, img_size, img_size)
 
-    # Export
-    # Note: FasterRCNN from torchvision can be exported to ONNX.
-    # We export the underlying model (self.model) to avoid Lightning wrapper issues
     torch.onnx.export(
         model.model,
         dummy_input,
@@ -94,14 +88,12 @@ def _export_fasterrcnn(checkpoint_path: Path, output_path: str, img_size: Option
         dynamic_axes={"images": {0: "batch_size", 2: "height", 3: "width"}},
     )
 
-    # Add metadata (classes) to ONNX model
     try:
         import onnx
 
         onnx_model = onnx.load(output_path)
         meta = onnx_model.metadata_props.add()
         meta.key = "names"
-        # Try to get names from cfg, fallback to generic
         names = getattr(model.cfg.data, "names", ["helmet", "head", "person"])
         meta.value = str(list(names))
 

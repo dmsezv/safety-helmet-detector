@@ -28,11 +28,9 @@ class Commands:
         Usage: python commands.py train --parameter=value
         Example: python commands.py train --train.epochs=20
         """
-        # Parse overrides
         overrides = [f"{k}={v}" for k, v in kwargs.items()]
         cfg = self._compose_config(overrides)
 
-        # Call the training pipeline
         train_task(cfg)
 
     def infer(self, checkpoint_path, image_path, **kwargs):

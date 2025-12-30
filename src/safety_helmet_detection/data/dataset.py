@@ -12,14 +12,12 @@ class SafetyHelmetDataset(Dataset):
     def __init__(self, root, transform=None):
         self.root = Path(root)
         self.transform = transform
-        # Ensure images and annotations match
         self.images_dir = self.root / "images"
         self.anns_dir = self.root / "annotations"
 
         self.imgs = sorted(list(self.images_dir.glob("*.png")))
 
         # User classes: Person, Helmet, Head
-        # Mapping to ID (1-based, 0 is background)
         self.class_map = {
             "helmet": 1,
             "head": 2,
@@ -32,7 +30,6 @@ class SafetyHelmetDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = self.imgs[idx]
-        # Corresponding XML
         ann_path = self.anns_dir / f"{img_path.stem}.xml"
 
         img = Image.open(img_path).convert("RGB")
@@ -68,19 +65,15 @@ class SafetyHelmetDataset(Dataset):
             labels = np.zeros((0,), dtype=np.int64)
 
         if self.transform:
-            # Albumentations requires bboxes
             transformed = self.transform(image=img_np, bboxes=boxes, labels=labels)
             img_tensor = transformed["image"]
             boxes_t = transformed["bboxes"]
             labels_t = transformed["labels"]
         else:
-            # Fallback if no transform (should minimally be to tensor)
-            # But assume caller provides transform including ToTensorV2
             img_tensor = ToTensorV2()(image=img_np)["image"]
             boxes_t = boxes
             labels_t = labels
 
-        # Convert to torch
         if len(boxes_t) > 0:
             boxes_t = torch.tensor(boxes_t, dtype=torch.float32)
             labels_t = torch.tensor(labels_t, dtype=torch.int64)
@@ -93,11 +86,7 @@ class SafetyHelmetDataset(Dataset):
         target["labels"] = labels_t
         target["image_id"] = torch.tensor([idx])
 
-        # Normalization to 0-1 happens in ToTensorV2 if float? No, ToTensorV2 implies 0-255 if uint8.
-        # Usually ToFloat(max_value=255) is needed before ToTensorV2 or normalize.
-        # I'll rely on the transform pipeline.
-
-        img_tensor = img_tensor.float() / 255.0  # Simple normalization if not in transform
+        img_tensor = img_tensor.float() / 255.0
 
         return img_tensor, target
 

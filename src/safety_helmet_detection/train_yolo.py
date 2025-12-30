@@ -71,8 +71,8 @@ def train_yolo(cfg: DictConfig):
 
     logger.info(f"Training complete: {output_dir / 'train'}")
 
-    # Auto-export to ONNX
     best_model_path = output_dir / "train" / "weights" / "best.pt"
+
     if best_model_path.exists():
         logger.info(f"Exporting best model to ONNX: {best_model_path}")
         model.export(format="onnx")
