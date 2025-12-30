@@ -37,10 +37,18 @@ def train_yolo(cfg: DictConfig):
     """Train YOLO using ultralytics native training."""
     logger.info(f"YOLO config:\n{OmegaConf.to_yaml(cfg)}")
 
+    import os
+
     from ultralytics import YOLO
 
     output_dir = Path("outputs/yolo")
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    # MLflow integration for YOLO
+    if cfg.logger.get("tracking_uri"):
+        os.environ["MLFLOW_TRACKING_URI"] = cfg.logger.tracking_uri
+        os.environ["MLFLOW_EXPERIMENT_NAME"] = cfg.logger.experiment_name
+        logger.info(f"MLflow tracking enabled for YOLO: {cfg.logger.tracking_uri}")
 
     dataset_yaml = create_dataset_yaml(cfg, output_dir)
     model = YOLO(cfg.model.get("name", "yolov8n.pt"))

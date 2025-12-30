@@ -1,6 +1,6 @@
 defaults:
   - data: default
-  - model: fasterrcnn
+  - model: yolov8
   - train: default
   - logger: mlflow
   - _self_
