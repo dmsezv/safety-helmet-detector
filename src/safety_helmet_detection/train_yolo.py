@@ -7,34 +7,9 @@ from pathlib import Path
 from omegaconf import DictConfig, OmegaConf
 from ultralytics import YOLO
 
-from .data.downloader import download_data
+from .utils import convert_xml_to_yolo, create_dataset_yaml, ensure_dataset_exists, get_device
 
 logger = logging.getLogger(__name__)
-
-
-def create_dataset_yaml(cfg: DictConfig, output_path: Path) -> Path:
-    """Create YOLO-format dataset.yaml file."""
-    data_dir = Path(cfg.data.data_dir).resolve()
-
-    yaml_content = f"""path: {data_dir}
-train: images
-val: images
-
-names:
-"""
-    for idx, name in enumerate(cfg.data.names):
-        yaml_content += f"  {idx}: {name}\n"
-
-    yaml_path = output_path / "dataset.yaml"
-    yaml_path.write_text(yaml_content)
-    return yaml_path
-
-
-def get_device(cfg: DictConfig) -> str:
-    """Convert config accelerator to YOLO device string."""
-    if cfg.train.accelerator == "gpu":
-        return "0"
-    return "cpu"
 
 
 def train_yolo(cfg: DictConfig):
@@ -44,20 +19,18 @@ def train_yolo(cfg: DictConfig):
     output_dir = Path("outputs/yolo")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Automatic dataset download if missing
-    data_path = Path(cfg.data.data_dir)
-    if not data_path.exists() or not any(data_path.iterdir()):
-        logger.info(f"Dataset not found or empty at {cfg.data.data_dir}. Starting download...")
-        download_data(cfg.data.data_dir, cfg.data.get("gdrive_folder_url"))
+    # Prepare data
+    ensure_dataset_exists(cfg)
+    convert_xml_to_yolo(cfg)
 
-    # MLflow integration for YOLO
+    # MLflow integration
     if cfg.logger.get("tracking_uri"):
         os.environ["MLFLOW_TRACKING_URI"] = cfg.logger.tracking_uri
         os.environ["MLFLOW_EXPERIMENT_NAME"] = cfg.logger.experiment_name
-        logger.info(f"MLflow tracking enabled for YOLO: {cfg.logger.tracking_uri}")
+        logger.info(f"MLflow tracking enabled: {cfg.logger.tracking_uri}")
 
     dataset_yaml = create_dataset_yaml(cfg, output_dir)
-    model = YOLO(cfg.model.get("name", "yolov8n.pt"))
+    model = YOLO(cfg.model.get("name", "yolov8m.pt"))
 
     results = model.train(
         data=str(dataset_yaml),
@@ -78,7 +51,6 @@ def train_yolo(cfg: DictConfig):
     logger.info(f"Training complete: {output_dir / 'train'}")
 
     best_model_path = output_dir / "train" / "weights" / "best.pt"
-
     if best_model_path.exists():
         logger.info(f"Exporting best model to ONNX: {best_model_path}")
         model.export(format="onnx")

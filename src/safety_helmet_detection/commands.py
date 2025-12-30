@@ -1,58 +1,76 @@
+"""Main entry point for the project CLI."""
+
 import logging
+import sys
 
 import fire
-import hydra
-from hydra.core.global_hydra import GlobalHydra
+from hydra import compose, initialize
 
-from .data.downloader import download_data as download_task
-from .export import export_model as export_task
-from .infer import infer as infer_task
-from .train import train as train_task
+from .export import export_model
+from .infer import infer as run_infer
+from .train import train as run_train
 
 logger = logging.getLogger(__name__)
 
 
-class Commands:
-    def _compose_config(self, overrides=None):
-        if overrides is None:
-            overrides = []
+def _get_config(kwargs):
+    """
+    Setup Hydra and compose config.
+    Captures dot-notation overrides from both kwargs and sys.argv.
+    """
 
-        GlobalHydra.instance().clear()
-        hydra.initialize(version_base=None, config_path="../../configs")
-        cfg = hydra.compose(config_name="config", overrides=overrides)
-        return cfg
+    # Flatten nested dicts from fire
+    def flatten(d, prefix=""):
+        items = []
+        for k, v in d.items():
+            new_key = f"{prefix}{k}"
+            if isinstance(v, dict):
+                items.extend(flatten(v, prefix=f"{new_key}."))
+            else:
+                items.append(f"{new_key}={v}")
+        return items
 
-    def train(self, **kwargs):
-        """
-        Train the model.
-        Usage: python commands.py train --parameter=value
-        Example: python commands.py train --train.epochs=20
-        """
-        overrides = [f"{k}={v}" for k, v in kwargs.items()]
-        cfg = self._compose_config(overrides)
+    overrides = flatten(kwargs)
 
-        train_task(cfg)
+    # Add raw dot-notation overrides directly from sys.argv
+    cli_overrides = [a for a in sys.argv if "=" in a and not a.startswith("-")]
+    for o in cli_overrides:
+        if o not in overrides:
+            overrides.append(o)
 
-    def infer(self, checkpoint_path, image_path, **kwargs):
-        """
-        Run inference.
-        """
-        infer_task(checkpoint_path, image_path, **kwargs)
+    if overrides:
+        logger.info(f"Overrides applied: {overrides}")
 
-    def download_data(self, data_dir="safety-helmet-ds", gdrive_url=None):
-        """
-        Download dataset.
-        """
-        download_task(data_dir, gdrive_url)
+    with initialize(config_path="../../configs", version_base="1.1"):
+        return compose(config_name="config", overrides=overrides)
 
-    def export(self, checkpoint_path, model_type="fasterrcnn", output_path=None, **kwargs):
-        """
-        Export model to ONNX.
-        Example: python -m safety_helmet_detection.commands export \
-            --checkpoint_path="outputs/yolo/train/weights/best.pt" --model_type="yolo"
-        """
-        export_task(checkpoint_path, output_path=output_path, model_type=model_type, **kwargs)
+
+def train(**kwargs):
+    """Train the model with Hydra configuration."""
+    cfg = _get_config(kwargs)
+    run_train(cfg)
+
+
+def export(checkpoint_path, model_type="fasterrcnn", output_path=None, **kwargs):
+    """Export trained model to ONNX."""
+    export_model(checkpoint_path, model_type=model_type, output_path=output_path, **kwargs)
+
+
+def infer_from_checkpoint(checkpoint_path, image_path, **kwargs):
+    """Run inference using a model checkpoint."""
+    cfg = _get_config(kwargs)
+    run_infer(cfg, checkpoint_path, image_path)
 
 
 if __name__ == "__main__":
-    fire.Fire(Commands)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
+
+    fire.Fire(
+        {
+            "train": train,
+            "export": export,
+            "infer": {
+                "from_checkpoint": infer_from_checkpoint,
+            },
+        }
+    )

@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 import albumentations as A
 import pytorch_lightning as pl
@@ -7,8 +6,8 @@ import torch
 from albumentations.pytorch import ToTensorV2
 from torch.utils.data import DataLoader
 
+from ..utils import ensure_dataset_exists
 from .dataset import SafetyHelmetDataset, collate_fn
-from .downloader import download_data
 
 logger = logging.getLogger(__name__)
 
@@ -20,12 +19,7 @@ class SafetyHelmetDataModule(pl.LightningDataModule):
         self.data_dir = cfg.data.data_dir
 
     def prepare_data(self):
-        data_path = Path(self.data_dir)
-        should_download = self.cfg.data.download or not data_path.exists() or not any(data_path.iterdir())
-
-        if should_download:
-            logger.info(f"Dataset not found or empty at {self.data_dir}. Starting download...")
-            download_data(self.data_dir, self.cfg.data.get("gdrive_folder_url"))
+        ensure_dataset_exists(self.cfg)
 
     def setup(self, stage=None):
         train_transform = A.Compose(
