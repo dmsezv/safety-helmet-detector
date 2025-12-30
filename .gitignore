@@ -157,3 +157,7 @@ cython_debug/
 safety-helmet-ds/
 outputs/
 mlruns/
+runs/
+*.pt
+*.ckpt
+*.onnx
