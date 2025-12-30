@@ -161,3 +161,4 @@ runs/
 *.pt
 *.ckpt
 *.onnx
+*.zip
