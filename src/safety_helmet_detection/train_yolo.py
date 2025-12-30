@@ -56,8 +56,17 @@ def train_yolo(cfg: DictConfig):
         exist_ok=True,
         device=get_device(cfg),
         workers=cfg.data.num_workers,
+        momentum=cfg.model.get("momentum", 0.937),
+        weight_decay=cfg.model.get("weight_decay", 0.0005),
         verbose=True,
     )
 
     logger.info(f"Training complete: {output_dir / 'train'}")
+
+    # Auto-export to ONNX
+    best_model_path = output_dir / "train" / "weights" / "best.pt"
+    if best_model_path.exists():
+        logger.info(f"Exporting best model to ONNX: {best_model_path}")
+        model.export(format="onnx")
+
     return results

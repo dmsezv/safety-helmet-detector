@@ -5,6 +5,7 @@ import hydra
 from hydra.core.global_hydra import GlobalHydra
 
 from .data.downloader import download_data as download_task
+from .export import export_model as export_task
 from .infer import infer as infer_task
 from .train import train as train_task
 
@@ -45,6 +46,14 @@ class Commands:
         Download dataset.
         """
         download_task(data_dir, gdrive_url)
+
+    def export(self, checkpoint_path, model_type="fasterrcnn", output_path=None, **kwargs):
+        """
+        Export model to ONNX.
+        Example: python -m safety_helmet_detection.commands export \
+            --checkpoint_path="outputs/yolo/train/weights/best.pt" --model_type="yolo"
+        """
+        export_task(checkpoint_path, output_path=output_path, model_type=model_type, **kwargs)
 
 
 if __name__ == "__main__":

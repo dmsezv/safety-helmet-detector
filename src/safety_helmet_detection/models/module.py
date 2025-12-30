@@ -56,6 +56,6 @@ class SafetyHelmetDetector(pl.LightningModule):
         return torch.optim.SGD(
             self.model.parameters(),
             lr=self.cfg.model.lr,
-            momentum=0.9,
-            weight_decay=0.0005,
+            momentum=self.cfg.model.get("momentum", 0.9),
+            weight_decay=self.cfg.model.get("weight_decay", 0.0005),
         )

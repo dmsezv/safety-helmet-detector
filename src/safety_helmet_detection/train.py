@@ -7,6 +7,7 @@ from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning.loggers import MLFlowLogger
 
 from .data.datamodule import SafetyHelmetDataModule
+from .export import export_model
 from .models.module import SafetyHelmetDetector
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,12 @@ def train_lightning(cfg: DictConfig):
 
     trainer.fit(model, datamodule=datamodule)
 
+    # Export best model to ONNX
+    best_path = trainer.checkpoint_callback.best_model_path
+    if best_path:
+        logger.info(f"Exporting best model to ONNX: {best_path}")
+        export_model(best_path, model_type="fasterrcnn")
+
 
 def _create_logger(cfg: DictConfig):
     """Create MLFlow logger if tracking_uri is configured."""
@@ -52,11 +59,22 @@ def _create_logger(cfg: DictConfig):
 
 def _create_trainer(cfg: DictConfig, pl_logger):
     """Create PyTorch Lightning Trainer."""
+    from pytorch_lightning.callbacks import ModelCheckpoint
+
+    checkpoint_callback = ModelCheckpoint(
+        dirpath="outputs/checkpoints",
+        filename="best_model",
+        monitor="val_loss",
+        save_top_k=1,
+        mode="min",
+    )
+
     return pl.Trainer(
         max_epochs=cfg.train.epochs,
         accelerator=cfg.train.accelerator,
         devices=cfg.train.devices,
         logger=pl_logger,
-        log_every_n_steps=10,
+        callbacks=[checkpoint_callback],
+        log_every_n_steps=cfg.train.get("log_every_n_steps", 10),
         precision=cfg.train.get("precision", 32),
     )

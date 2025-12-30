@@ -4,3 +4,4 @@ accelerator: auto # cpu, gpu, mps, auto
 devices: 1
 precision: 16-mixed
 patience: 10 # for early stopping
+log_every_n_steps: 10
