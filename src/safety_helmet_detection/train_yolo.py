@@ -1,9 +1,13 @@
 """YOLO training using native ultralytics API."""
 
 import logging
+import os
 from pathlib import Path
 
 from omegaconf import DictConfig, OmegaConf
+from ultralytics import YOLO
+
+from .data.downloader import download_data
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +41,14 @@ def train_yolo(cfg: DictConfig):
     """Train YOLO using ultralytics native training."""
     logger.info(f"YOLO config:\n{OmegaConf.to_yaml(cfg)}")
 
-    import os
-
-    from ultralytics import YOLO
-
     output_dir = Path("outputs/yolo")
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Automatic dataset download if missing
+    data_path = Path(cfg.data.data_dir)
+    if not data_path.exists() or not any(data_path.iterdir()):
+        logger.info(f"Dataset not found or empty at {cfg.data.data_dir}. Starting download...")
+        download_data(cfg.data.data_dir, cfg.data.get("gdrive_folder_url"))
 
     # MLflow integration for YOLO
     if cfg.logger.get("tracking_uri"):
