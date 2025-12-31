@@ -1,0 +1,6 @@
+outs:
+- md5: f342b16bd9b51f2c2c66bfd294b7ce5f.dir
+  size: 1321529246
+  nfiles: 10002
+  hash: md5
+  path: safety-helmet-ds
