@@ -1,6 +1,10 @@
 # Safety Helmet Detector
 
-Проект по детекции защитных касок (Safety Helmets) с использованием MLOps инструментов: PyTorch Lightning, YOLOv8, Hydra, MLflow и DVC.
+Проект по детекции наличия защитных касок (Safety Helmets) у людей на предприятии.
+
+## Цель проекта
+
+Обеспечение безопасности людей на предприятии путем фиксации соблюдения технический требований и преждевременного предупреждения в случае их нарушения.
 
 ## Архитектура моделей
 
@@ -19,22 +23,68 @@
 ## Setup
 
 В этом проекте для управления зависимостями используется [Poetry](https://python-poetry.org/).
+Для обеспечения качества кода используются `pre-commit` хуки.
 
-### 1. Установка проекта
+### 1. Установка инструментов
+
+- Python 3.9+
+- Poetry (инструкция: https://python-poetry.org/docs/#installation)
+- Git
+
+#### Poetry
+
+- **macOS / Linux / WSL:**
+  ```bash
+  curl -sSL https://install.python-poetry.org | python3 -
+  ```
+- **Windows (PowerShell):**
+  ```powershell
+  (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+  ```
+_Примечание: После poetry install может потребоваться добавить `~/.local/bin` в ваш `PATH`. Выполните:_
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+Подробная инструкция: [Poetry docs](https://python-poetry.org/docs/#installation).
+
+
+### 2. Установка проекта и активация окружения
 
 ```bash
-git clone <your-repo-url>
+git clone
 cd safety-helmet-detector
 poetry install
 source $(poetry env info --path)/bin/activate
 pre-commit install
 ```
 
+#### Проверка корректность установки
+
+```bash
+pre-commit -a run
+```
+
+<picture>
+  <img alt="" src="https://github.com/dmsezv/safety-helmet-detector/blob/main/readme_img/tests_acc.png">
+</picture>
+
 ### 2. Данные
+
+Для обучения моделей используется датасет из открытых источников, На данный момент он размещен на Google Drive и ссылка добавлена в конфиг файлах. Датасет содержит 3 класса, полностью размечен и подготовлен для обучения
+
+```
+"Helmet": 1
+"Head": 2
+"Person": 3,
+```
 
 Проект настроен на **автоматическую загрузку данных**.
 
-> Система автоматически скачивает ZIP-архив с Google Drive и распаковывает его в папку `safety-helmet-ds` перед началом обучения, если данные отсутствуют.
+> Tсли данные отсутствуют, система автоматически скачивает ZIP-архив с Google Drive и распакуетт его в папку `safety-helmet-ds` при первом старте обучения.
+
+<picture>
+  <img alt="" src="https://github.com/dmsezv/safety-helmet-detector/blob/main/readme_img/ds_load.png">
+</picture>
 
 ### 3. Запуск MLflow
 
@@ -43,6 +93,7 @@ pre-commit install
 ```bash
 mlflow server --host 127.0.0.1 --port 8080
 ```
+
 
 ## Training
 
@@ -75,6 +126,13 @@ python -m safety_helmet_detection.commands train model=fasterrcnn
 python -m safety_helmet_detection.commands train train.epochs=20 data.batch_size=16
 ```
 
+<picture>
+  <img alt="" src="https://github.com/dmsezv/safety-helmet-detector/blob/main/readme_img/ml_flow_1.png">
+</picture>
+<picture>
+  <img alt="" src="https://github.com/dmsezv/safety-helmet-detector/blob/main/readme_img/ml_flow_2.png">
+</picture>
+
 ## Inference & Export
 
 ### Экспорт в ONNX
@@ -88,6 +146,10 @@ python -m safety_helmet_detection.commands export \
 ```
 
 ### Инференс (Stub)
+
+Предполагается использовать инференс с потоковым видео и выводом результатов online. Для реализации используются инструменты ffmpeg, open CV
+
+>Не реализован в рамках текущей задачи
 
 ```bash
 python -m safety_helmet_detection.commands infer \
