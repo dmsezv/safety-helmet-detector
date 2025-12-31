@@ -99,7 +99,7 @@ pre-commit install
 #### Проверка корректность установки
 
 ```bash
-pre-commit -a run
+pre-commit run -a 
 ```
 
 <picture>
