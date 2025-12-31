@@ -73,11 +73,12 @@
   ```powershell
   (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
   ```
-  _Примечание: После poetry install может потребоваться добавить `~/.local/bin` в ваш `PATH`. Выполните:_
 
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
+> [!TIP]
+> После установки poetry может потребоваться добавить `~/.local/bin` в ваш `PATH`.
+>```bash
+>    export PATH="$HOME/.local/bin:$PATH"
+>```
 
 ### 2. Установка проекта и активация окружения
 
@@ -120,7 +121,8 @@ pre-commit run -a
 
 Проект настроен на **автоматическую загрузку данных**.
 
-> Если данные отсутствуют, система автоматически скачивает ZIP-архив с Google Drive и распакует его в папку `safety-helmet-ds` и подготовит для работы при первом старте обучения.
+>[!IMPORTANT]
+> Если данные отсутствуют, система автоматически скачает ZIP-архив с Google Drive, распакует его в папку `safety-helmet-ds` и подготовит для работы при первом старте обучения.
 
 <picture>
   <img alt="" src="https://github.com/dmsezv/safety-helmet-detector/blob/main/readme_img/ds_load.png">
@@ -154,12 +156,14 @@ mlflow server --host 127.0.0.1 --port 8080
 
 Результаты будут доступны по адресу: `http://localhost:8080`.
 
-> Если обучаете модель удаленно то используйте `--host 0.0.0.0` и подключайтесь по адресу: `http://<ip сервера>:8080`
+>[!TIP]
+>Если обучаете модель удаленно, то используйте `--host 0.0.0.0` и подключайтесь по адресу: `http://<ip сервера>:8080`
 
 ## Обучение моделей (Training)
 
 Все управление осуществляется через единую точку входа — `commands.py`.
 
+> [!IMPORTANT]
 > По умолчанию запускается обучение **YOLOv8**.
 
 ### Обучение YOLOv8 (по умолчанию)
@@ -222,7 +226,8 @@ python -m safety_helmet_detection.commands export \
 
 Предполагается использовать инференс с потоковым видео и выводом результатов online. Для реализации используются инструменты ffmpeg, open CV
 
-> Не реализован в рамках текущей задачи
+>[!WARNING]
+>Не реализован в рамках текущей задачи
 
 ```bash
 python -m safety_helmet_detection.commands infer \
