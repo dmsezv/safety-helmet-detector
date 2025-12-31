@@ -31,9 +31,7 @@ def download_data(data_dir: str, gdrive_url: str = None):
             with zipfile.ZipFile(zip_path, "r") as zip_ref:
                 zip_ref.extractall(path)
             zip_path.unlink()
-
-            # Flatten directory structure if needed
-            # (e.g., if ZIP contains a single folder or __MACOSX noise)
+            
             _flatten_directory(path)
 
         logger.info("Data preparation complete.")
@@ -62,7 +60,6 @@ def _flatten_directory(path: Path):
         logger.info("Dataset structure is already correct.")
         return
 
-    # Move everything from the found parent to the root
     logger.info(f"Correcting dataset structure: moving contents from {images_parent} to {path}")
     for item in images_parent.iterdir():
         dest = path / item.name
@@ -73,7 +70,6 @@ def _flatten_directory(path: Path):
                 dest.unlink()
         shutil.move(str(item), str(dest))
 
-    # Cleanup empty folders or noise left in the root
     for item in path.iterdir():
         if item.is_dir() and item.name not in ["images", "annotations"]:
             try:
