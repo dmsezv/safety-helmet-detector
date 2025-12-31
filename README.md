@@ -166,7 +166,7 @@ mlflow server --host 127.0.0.1 --port 8080
 > [!IMPORTANT]
 > По умолчанию запускается обучение **YOLOv8**.
 
-### Обучение YOLOv8 (по умолчанию)
+### Обучение YOLOv8
 
 ```bash
 python -m safety_helmet_detection.commands train
@@ -180,8 +180,6 @@ python -m safety_helmet_detection.commands train model=fasterrcnn
 
 ### Гибкая настройка через CLI
 
-Благодаря Hydra, вы можете менять любой параметр «на лету»:
-
 ```bash
 python -m safety_helmet_detection.commands train \
     train.epochs=50 \
@@ -194,8 +192,8 @@ python -m safety_helmet_detection.commands train \
 
 - `train.epochs=N` — количество эпох.
 - `data.batch_size=N` — размер батча.
-- `data.download=True` — скачать датасет автоматически перед обучением.
-- `train.precision=32` — точность (по умолчанию 32 для стабильности на Mac MPS).
+- `data.download=True` — скачать датасет автоматически перед обучением (по умолчанию True).
+- `train.precision=32` — точность.
 
 Пример:
 
